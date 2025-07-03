@@ -53,6 +53,11 @@
         #caption-list { display: flex; flex-direction: column; gap: 15px; }
         .caption-card { background-color: var(--card-bg-color); border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px var(--shadow-color); border: 1px solid var(--border-color); transition: background-color 0.3s ease, border-color 0.3s ease; }
         .caption-card .caption-text { font-size: 1.1em; line-height: 1.7; margin-bottom: 20px; }
+        /* ======== নতুন যোগ করা সিএসএস এখানে শুরু ======== */
+/* ছবির জন্য নতুন স্টাইল */
+.caption-card.image-card { padding: 10px; }
+.caption-card .caption-image { max-width: 100%; border-radius: 8px; display: block; }
+/* ======== নতুন যোগ করা সিএসএস এখানে শেষ ======== */
         .actions { display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--border-color); padding-top: 15px; transition: border-color 0.3s ease; }
         .action-button { background: none; border: none; color: #555; cursor: pointer; font-size: 0.9em; font-weight: 600; padding: 8px 12px; border-radius: 8px; display: flex; align-items: center; gap: 8px; transition: background-color 0.2s ease, color 0.2s ease; }
         body[data-theme="dark"] .action-button { color: #bbb; }
@@ -163,6 +168,21 @@
             <p>যে নিজেকে অক্ষম ভাবে, তাকে কেউ সাহায্য করতে পারে না। - জন এন্ডারসন</p>
         </div>
 
+        <!-- নতুন যোগ করা ক্যাটাগরি: 18+ Adult -->
+        <div class="category-data" data-key="adult-captions" data-title="18+ Adult" data-subtitle="শুধুমাত্র প্রাপ্তবয়স্কদের জন্য" data-icon="🔞" data-type="text">
+            <p>এখানে আপনার প্রাপ্তবয়স্কদের জন্য ক্যাপশন যোগ করুন।</p>
+            <p>আরেকটি নমুনা ক্যাপশন।</p>
+        </div>
+
+        <!-- নতুন যোগ করা ক্যাটাগরি: Memes Zone (শুধুমাত্র ছবির জন্য) -->
+        <div class="category-data" data-key="memes-zone" data-title="Memes Zone" data-subtitle="Daily Dose of Fun" data-icon="🤣" data-type="image">
+            <!-- এখানে p ট্যাগের পরিবর্তে img ট্যাগ ব্যবহার করুন -->
+            <!-- ছবির লিংক "images/meme1.jpg" এভাবে দিন অথবা অনলাইন লিংক ব্যবহার করুন -->
+            <img src="https://via.placeholder.com/400x400.png?text=Meme+1" alt="Meme 1">
+            <img src="https://via.placeholder.com/400x500.png?text=Meme+2" alt="Meme 2">
+        </div>
+        
+
         <!-- ক্যাটাগরি: ডেভেলপারের সাথে যোগাযোগ (এটি এডিট করার দরকার নেই) -->
         <div class="category-data" data-key="developer-contact" data-title="ডেভেলপারের সাথে যোগাযোগ" data-subtitle="যেকোনো প্রয়োজনে" data-icon="🧑‍💻" data-is-contact="true">
             <!-- এই ক্যাটাগরিতে কোনো ক্যাপশন যোগ করার দরকার নেই -->
@@ -174,48 +194,152 @@
     <!-- ===================================================================== -->
 
     <script>
-        const captionsData = {}; // এই অবজেক্টটি এখন খালি থাকবে, ডেটা HTML থেকে আসবে
-        const screens = { 'category-screen': document.getElementById('category-screen'), 'caption-screen': document.getElementById('caption-screen'), 'contact-screen': document.getElementById('contact-screen') };
-        const categoryGrid = document.querySelector('.category-grid');
-        const captionList = document.getElementById('caption-list');
-        const captionHeaderTitle = document.getElementById('caption-header-title');
-        const themeToggle = document.getElementById('theme-toggle');
-        
-        function parseHtmlData() {
-            const dataContainer = document.getElementById('data-source');
-            const categories = dataContainer.querySelectorAll('.category-data');
-            
-            categories.forEach(catElement => {
-                const key = catElement.dataset.key;
-                if (!key) return;
+       const captionsData = {}; // এই অবজেক্টটি এখন খালি থাকবে, ডেটা HTML থেকে আসবে
+const screens = {
+    'category-screen': document.getElementById('category-screen'),
+    'caption-screen': document.getElementById('caption-screen'),
+    'contact-screen': document.getElementById('contact-screen')
+};
+const categoryGrid = document.querySelector('.category-grid');
+const captionList = document.getElementById('caption-list');
+const captionHeaderTitle = document.getElementById('caption-header-title');
+const themeToggle = document.getElementById('theme-toggle');
 
-                captionsData[key] = {
-                    title: catElement.dataset.title,
-                    subtitle: catElement.dataset.subtitle,
-                    icon: catElement.dataset.icon,
-                    isContact: catElement.dataset.isContact === 'true',
-                    captions: []
-                };
+/**
+ * HTML এর data-source div থেকে ডেটা পার্স করে captionsData অবজেক্ট তৈরি করে।
+ * এটি কন্টেন্টের ধরন (text বা image) অনুযায়ী ডেটা সংগ্রহ করে।
+ */
+function parseHtmlData() {
+    const dataContainer = document.getElementById('data-source');
+    dataContainer.querySelectorAll('.category-data').forEach(catElement => {
+        const key = catElement.dataset.key;
+        if (!key) return;
 
-                if (!captionsData[key].isContact) {
-                    const captionParagraphs = catElement.querySelectorAll('p');
-                    captionParagraphs.forEach(p => {
-                        captionsData[key].captions.push(p.innerHTML);
-                    });
-                }
-            });
+        const contentType = catElement.dataset.type || 'text';
+        const items = [];
+
+        if (contentType === 'text') {
+            catElement.querySelectorAll('p').forEach(p => items.push(p.innerHTML));
+        } else if (contentType === 'image') {
+            catElement.querySelectorAll('img').forEach(img => items.push(img.getAttribute('src')));
         }
+        
+        captionsData[key] = {
+            title: catElement.dataset.title,
+            subtitle: catElement.dataset.subtitle,
+            icon: catElement.dataset.icon,
+            isContact: catElement.dataset.isContact === 'true',
+            type: contentType,
+            items: items
+        };
+    });
+}
 
-        function showScreen(screenName) { Object.values(screens).forEach(screen => screen.style.display = 'none'); screens[screenName].style.display = 'block'; window.scrollTo(0, 0); }
-        function displayCategories() { categoryGrid.innerHTML = ''; for (const key in captionsData) { const category = captionsData[key]; const item = document.createElement('div'); item.className = 'category-item'; item.innerHTML = `<div class="icon">${category.icon}</div><h3>${category.title}</h3><p>${category.subtitle}</p>`; item.addEventListener('click', () => { if (category.isContact) showScreen('contact-screen'); else { displayCaptions(key); showScreen('caption-screen'); } }); categoryGrid.appendChild(item); } }
-        function displayCaptions(categoryKey) { const category = captionsData[categoryKey]; captionHeaderTitle.textContent = category.title; captionList.innerHTML = category.captions.length ? '' : '<p>এই ক্যাটাগরিতে এখনো কোনো ক্যাপশন যোগ করা হয়নি।</p>'; category.captions.forEach(caption => { const card = document.createElement('div'); card.className = 'caption-card'; card.innerHTML = `<p class="caption-text">${caption}</p><div class="actions"><button class="action-button copy-btn">📋 কপি</button><button class="action-button share-btn">🔗 শেয়ার</button></div>`; captionList.appendChild(card); }); }
-        captionList.addEventListener('click', function(e) { const button = e.target.closest('.action-button'); if (!button) return; const card = button.closest('.caption-card'); const text = card.querySelector('.caption-text').innerText; if (button.classList.contains('copy-btn')) { navigator.clipboard.writeText(text).then(() => { button.textContent = '✅ কপিড!'; button.classList.add('copied'); setTimeout(() => { button.innerHTML = '📋 কপি'; button.classList.remove('copied'); }, 2000); }).catch(() => alert('কপি করতে সমস্যা হয়েছে। ওয়েবসাইটটি সার্ভারে হোস্ট করলে এটি কাজ করবে।')); } if (button.classList.contains('share-btn')) { if (navigator.share) { navigator.share({ title: 'Caption Buzz থেকে', text }).catch(console.error); } else { alert('আপনার ব্রাউজার শেয়ার অপশন সাপোর্ট করে না।'); } } });
-        themeToggle.addEventListener('change', () => { if (themeToggle.checked) { document.body.setAttribute('data-theme', 'dark'); } else { document.body.removeAttribute('data-theme'); } });
-        document.addEventListener('contextmenu', event => event.preventDefault());
-        document.addEventListener('DOMContentLoaded', () => {
-            parseHtmlData();
-            displayCategories();
+/**
+ * নির্দিষ্ট স্ক্রিন দেখানোর জন্য এই ফাংশনটি ব্যবহৃত হয়।
+ * @param {string} screenName - যে স্ক্রিনটি দেখানো হবে তার আইডি।
+ */
+function showScreen(screenName) {
+    Object.values(screens).forEach(screen => screen.style.display = 'none');
+    screens[screenName].style.display = 'block';
+    window.scrollTo(0, 0);
+}
+
+/**
+ * হোমপেজে সমস্ত ক্যাটাগরি কার্ড প্রদর্শন করে।
+ */
+function displayCategories() {
+    categoryGrid.innerHTML = '';
+    for (const key in captionsData) {
+        const category = captionsData[key];
+        const item = document.createElement('div');
+        item.className = 'category-item';
+        item.innerHTML = `<div class="icon">${category.icon}</div><h3>${category.title}</h3><p>${category.subtitle}</p>`;
+        
+        item.addEventListener('click', () => {
+            if (category.isContact) {
+                showScreen('contact-screen');
+            } else {
+                displayItems(key);
+                showScreen('caption-screen');
+            }
         });
+        categoryGrid.appendChild(item);
+    }
+}
+
+/**
+ * নির্দিষ্ট ক্যাটাগরির আইটেমগুলো (টেক্সট বা ছবি) প্রদর্শন করে।
+ * @param {string} categoryKey - যে ক্যাটাগরির আইটেম দেখানো হবে তার কী।
+ */
+function displayItems(categoryKey) {
+    const category = captionsData[categoryKey];
+    captionHeaderTitle.textContent = category.title;
+    captionList.innerHTML = category.items.length ? '' : '<p>এই ক্যাটাগরিতে এখনো কোনো কন্টেন্ট যোগ করা হয়নি।</p>';
+    
+    category.items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'caption-card';
+
+        if (category.type === 'text') {
+            // টেক্সট কন্টেন্টের জন্য কার্ড তৈরি
+            card.innerHTML = `<p class="caption-text">${item}</p>
+                <div class="actions">
+                    <button class="action-button copy-btn">📋 কপি</button>
+                    <button class="action-button share-btn">🔗 শেয়ার</button>
+                </div>`;
+        } else if (category.type === 'image') {
+            // ইমেজ কন্টেন্টের জন্য কার্ড তৈরি
+            card.classList.add('image-card');
+            card.innerHTML = `<img src="${item}" class="caption-image" alt="${category.title} Image">`;
+        }
+        captionList.appendChild(card);
+    });
+}
+
+// কপি এবং শেয়ার বাটনের জন্য ইভেন্ট লিসেনার
+captionList.addEventListener('click', function(e) {
+    const button = e.target.closest('.action-button');
+    if (!button) return; // যদি বাটনে ক্লিক না হয়ে থাকে তবে ফাংশন থেকে বের হয়ে যাও
+
+    const card = button.closest('.caption-card');
+    const text = card.querySelector('.caption-text').innerText;
+
+    if (button.classList.contains('copy-btn')) {
+        navigator.clipboard.writeText(text).then(() => {
+            button.textContent = '✅ কপিড!';
+            button.classList.add('copied');
+            setTimeout(() => {
+                button.innerHTML = '📋 কপি';
+                button.classList.remove('copied');
+            }, 2000);
+        }).catch(() => {
+            alert('কপি করতে সমস্যা হয়েছে। ওয়েবসাইটটি সার্ভারে হোস্ট করলে এটি কাজ করবে।');
+        });
+    }
+
+    if (button.classList.contains('share-btn')) {
+        if (navigator.share) {
+            navigator.share({ title: 'Caption Buzz থেকে', text }).catch(console.error);
+        } else {
+            alert('আপনার ব্রাউজার শেয়ার অপশন সাপোর্ট করে না।');
+        }
+    }
+});
+
+// থিম পরিবর্তন করার জন্য ইভেন্ট লিসেনার
+themeToggle.addEventListener('change', () => {
+    document.body.setAttribute('data-theme', themeToggle.checked ? 'dark' : '');
+});
+
+// রাইট-ক্লিক ব্লক করা
+document.addEventListener('contextmenu', event => event.preventDefault());
+
+// পেজ লোড হওয়ার পর ডেটা পার্স এবং ক্যাটাগরি প্রদর্শনের জন্য মূল ফাংশন কল
+document.addEventListener('DOMContentLoaded', () => {
+    parseHtmlData();
+    displayCategories();
+}); 
     </script>
 </body>
 </html>
