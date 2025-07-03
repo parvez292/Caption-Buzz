@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Caption Buzz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #00796b; --secondary-color: #f4f6f8; --font-color: #333;
+            --card-bg-color: #ffffff; --shadow-color: rgba(0, 0, 0, 0.08); --border-color: #e0e0e0;
+            --header-text-color: #ffffff;
+        }
+        body[data-theme="dark"] {
+            --primary-color: #00897b; --secondary-color: #121212; --font-color: #e0e0e0;
+            --card-bg-color: #1e1e1e; --shadow-color: rgba(0, 0, 0, 0.2); --border-color: #333;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Hind Siliguri', sans-serif; background-color: var(--secondary-color);
+            color: var(--font-color); transition: background-color 0.3s ease, color 0.3s ease;
+            -webkit-user-select: none; -ms-user-select: none; user-select: none;
+        }
+        .container { padding: 15px; max-width: 100%; overflow-x: hidden; }
+        .header {
+            background: linear-gradient(45deg, rgb(0, 121, 107), rgb(0, 77, 64)); /* আপনার কাস্টম গ্রেডিয়েন্ট ঠিক রাখা হয়েছে */
+            color: var(--header-text-color); padding: 15px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 1000;
+        }
+        .header-content { display: flex; align-items: center; }
+        .header-logo { width: 32px; height: 32px; border-radius: 50%; margin-right: 12px; background-color: #fff; padding: 2px; }
+        .header h1 { font-size: 1.3em; margin: 0; }
+        .back-button { background: none; border: none; color: var(--header-text-color); font-size: 1.8em; cursor: pointer; margin-right: 15px; }
+        .theme-switcher { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .theme-switcher input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.4); transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #4caf50; }
+        input:checked + .slider:before { transform: translateX(22px); }
+        #category-screen, #caption-screen, #contact-screen, #tasbih-screen { display: block; }
+        #caption-screen, #contact-screen, #tasbih-screen { display: none; }
+        .main-title { text-align: center; margin: 20px 0; color: var(--primary-color); font-size: 1.8em; font-weight: 700; transition: color 0.3s ease; }
+        .category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .category-item { background-color: var(--card-bg-color); border-radius: 12px; padding: 20px 15px; text-align: center; cursor: pointer; box-shadow: 0 4px 12px var(--shadow-color); border: 1px solid var(--border-color); transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, border-color 0.3s ease; }
+        .category-item:hover { transform: translateY(-6px); box-shadow: 0 8px 20px var(--shadow-color); }
+        .category-item .icon { font-size: 2.5em; margin-bottom: 10px; height: 40px; display: flex; align-items: center; justify-content: center; width: 100%;} /* আইকনের সাইজ ঠিক রাখার জন্য */
+        .category-item .icon img { width: 40px; height: 40px; } /* আপনার কাস্টম SVG আইকনের জন্য */
+        .category-item h3 { font-size: 1.1em; font-weight: 600; margin-bottom: 5px; }
+        .category-item p { font-size: 0.8em; color: #757575; }
+        body[data-theme="dark"] .category-item p { color: #aaa; }
+        #caption-list { display: flex; flex-direction: column; gap: 15px; }
+        .caption-card { background-color: var(--card-bg-color); border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px var(--shadow-color); border: 1px solid var(--border-color); transition: background-color 0.3s ease, border-color 0.3s ease; }
+        .caption-card .caption-text { font-size: 1.1em; line-height: 1.7; margin-bottom: 20px; white-space: pre-wrap; }
+        .caption-card.image-card { padding: 10px; }
+        .caption-card .caption-image { max-width: 100%; border-radius: 8px; display: block; }
+        .actions { display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--border-color); padding-top: 15px; transition: border-color 0.3s ease; }
+        .action-button { background: none; border: none; color: #555; cursor: pointer; font-size: 0.9em; font-weight: 600; padding: 8px 12px; border-radius: 8px; display: flex; align-items: center; gap: 8px; transition: background-color 0.2s ease, color 0.2s ease; }
+        body[data-theme="dark"] .action-button { color: #bbb; }
+        .action-button:hover { background-color: var(--secondary-color); }
+        .action-button.copied { color: var(--primary-color); font-weight: 700; }
+        .contact-links { display: flex; flex-direction: column; gap: 20px; margin-top: 20px; }
+        .contact-link-card { display: flex; align-items: center; gap: 20px; background-color: var(--card-bg-color); padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px var(--shadow-color); text-decoration: none; color: var(--font-color); transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease; }
+        .contact-link-card:hover { transform: translateY(-6px); box-shadow: 0 8px 20px var(--shadow-color); }
+        .contact-link-card .contact-icon { width: 40px; height: 40px; }
+        .contact-link-card .contact-info h3 { margin: 0; font-size: 1.2em; }
+        
+        /* ================== নতুন তাসবিহ CSS এখানে শুরু ===================== */
+        .tasbih-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+        .tasbih-selection {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+        .tasbih-option {
+            background-color: var(--card-bg-color);
+            border: 2px solid var(--border-color);
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .tasbih-option.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        .tasbih-display {
+            background-color: var(--card-bg-color);
+            border-radius: 12px;
+            padding: 20px;
+            width: 100%;
+            max-width: 350px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px var(--shadow-color);
+        }
+        .tasbih-display .current-tasbih {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            min-height: 40px;
+        }
+        .tasbih-display .counter {
+            font-size: 4em;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .tasbih-main-button {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, var(--primary-color), #004d40);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0, 121, 107, 0.3);
+            transition: all 0.2s ease-out;
+            color: white;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .tasbih-main-button:active {
+            transform: scale(0.95);
+            box-shadow: 0 5px 10px rgba(0, 121, 107, 0.4);
+        }
+        .tasbih-reset-button {
+            margin-top: 25px;
+            background-color: #ef5350;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .tasbih-reset-button:hover {
+            background-color: #d32f2f;
+        }
+        /* ================== নতুন তাসবিহ CSS এখানে শেষ ===================== */
+    </style>
+</head>
+<body>
+
+    <div id="category-screen">
+        <div class="header">
+            <div class="header-content">
+                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzAwNzk2YiIvPjxwYXRoIGQ9Ik02OS4xMyw2OS4zN0E3NS4xMyw3NS4xMywwLDAsMSwzNy4yOSwyMy42MmMxLjE2LTIuNjgsNC40MS02LDcuNTUtNy42NCwzLjktMi4xLDguMzktMi44NywxMi4yMy0yLjEyLDYuNzIsMS4zLDExLjUyLDUsMTUwNyw5LjYxLDQuNDUsNC44Myw3LjQ2LDEwLjkyLDcuMzYLDE3LjY2LS4wOCw2LjYtMy41MSwxMi42Ny03LjgzLDE3LjQ0QzY4LjI3LDY0LjksNjYsNjcuMjcsNjkuMTMsNjkuMzdaIiBmaWxsPSIjZmZmIi8+PC9zdmc+" class="header-logo" alt="Logo">
+                <h1>Caption Buzz</h1>
+            </div>
+            <label class="theme-switcher">
+                <input type="checkbox" id="theme-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="container">
+            <h2 class="main-title">ক্যাপশনের দুনিয়া</h2>
+            <div class="category-grid"></div>
+        </div>
+    </div>
+
+    <div id="caption-screen">
+        <div class="header">
+            <div class="header-content">
+                <button class="back-button" onclick="showScreen('category-screen')">&#8592;</button>
+                <h1 id="caption-header-title">ক্যাপশন</h1>
+            </div>
+        </div>
+        <div class="container"><div id="caption-list"></div></div>
+    </div>
+    
+    <!-- ================== নতুন তাসবিহ স্ক্রিন এখানে শুরু ===================== -->
+    <div id="tasbih-screen">
+        <div class="header">
+            <div class="header-content">
+                <button class="back-button" onclick="showScreen('category-screen')">&#8592;</button>
+                <h1>ডিজিটাল তাসবিহ</h1>
+            </div>
+        </div>
+        <div class="tasbih-container">
+            <div class="tasbih-selection">
+                <button class="tasbih-option active" data-tasbih="সুবহানাল্লাহ">সুবহানাল্লাহ</button>
+                <button class="tasbih-option" data-tasbih="আলহামদুলিল্লাহ">আলহামদুলিল্লাহ</button>
+                <button class="tasbih-option" data-tasbih="আল্লাহু আকবার">আল্লাহু আকবার</button>
+                <button class="tasbih-option" data-tasbih="লা ইলাহা ইল্লাল্লাহ">লা ইলাহা ইল্লাল্লাহ</button>
+            </div>
+            <div class="tasbih-display">
+                <div class="current-tasbih" id="current-tasbih-display">সুবহানাল্লাহ</div>
+                <div class="counter" id="tasbih-counter-display">0</div>
+            </div>
+            <button class="tasbih-main-button" id="tasbih-count-button">গণনা করুন</button>
+            <button class="tasbih-reset-button" id="tasbih-reset-button">রিসেট</button>
+        </div>
+    </div>
+    <!-- ================== নতুন তাসবিহ স্ক্রিন এখানে শেষ ===================== -->
+    
+    <div id="contact-screen">
+         <div class="header">
+            <div class="header-content">
+                <button class="back-button" onclick="showScreen('category-screen')">&#8592;</button>
+                <h1>যোগাযোগ করুন</h1>
+            </div>
+        </div>
+        <div class="container">
+            <div class="contact-links"></div>
+        </div>
+    </div>
+
+    <!-- ================== ক্যাপশন ডেটা এখানে শুরু (আপনার বিদ্যমান কন্টেন্ট সহ) ===================== -->
+    <div id="data-source" style="display: none;">
+
+        <div class="category-data" data-key="funny-status" data-title="ফানি স্ট্যাটাস" data-subtitle="বাংলার সেরা ফানি পোস্ট" data-icon="<img src='https://www.svgrepo.com/show/475605/funny.svg' alt='funny icon'> " data-type="text">
+            <p>জমлось মেঘ আকাশে,<br> উড়ছে একদল হাস,<br> আম্মু বকে না গালি দেয়,<br> এইডাই ইতিহাস।</p>
+        </div>
+
+        <!-- নতুন যোগ করা ক্যাটাগরি: তাসবিহ -->
+        <div class="category-data" data-key="tasbih-counter" data-title="তাসবিহ" data-subtitle="ডিজিটাল কাউন্টার" data-icon="<img src='https://www.svgrepo.com/show/443209/tasbih.svg' alt='Tasbih Icon'> " data-type="interactive">
+            <!-- এটি ইন্টারেক্টিভ, তাই কোনো ক্যাপশন নেই -->
+        </div>
+
+        <div class="category-data" data-key="love-status" data-title="রোমান্টিক ক্যাপশন" data-subtitle="ভালোবাসার মিষ্টি কথা" data-icon="<img src='https://www.svgrepo.com/show/475685/love.svg' alt='Love Icon'> " data-type="text">
+            <p>তুমি সেই কবিতা, যা আমি প্রতিদিন পড়ি কিন্তু কখনো শেষ হয় না। ❤️</p>
+        </div>
+
+        <!-- নতুন যোগ করা ক্যাটাগরি: ছোট কবিতা -->
+        <div class="category-data" data-key="short-poems" data-title="ছোট কবিতা" data-subtitle="অনুভূতির প্রতিচ্ছবি" data-icon="<img src='https://www.svgrepo.com/show/493976/poem.svg' alt='Poem Icon'> " data-type="text">
+            <p>মেঘের কোলে রোদ হেসেছে,<br>বাদল গেছে টুটি।<br>আজ আমাদের ছুটি ও ভাই,<br>আজ আমাদের ছুটি।</p>
+            <p>কাঠবেড়ালি! কাঠবেড়ালি! পেয়ারা তুমি খাও?<br>গুড়-মুড়ি খাও? দুধ-ভাত খাও?<br>বাতাবি-নেবু? লাউ?</p>
+        </div>
+
+        <div class="category-data" data-key="islamic-status" data-title="ইসলামিক স্ট্যাটাস" data-subtitle="ঈমান ও আমল" data-icon="<img src='https://www.svgrepo.com/show/497141/islam.svg' alt='Islam Icon'> " data-type="text">
+            <p>হে আল্লাহ, এমন জীবন দিও না যেখানে তুমি ছাড়া আর সবই আছে।</p>
+        </div>
+
+        <div class="category-data" data-key="wise-quotes" data-title="মনীষীদের উক্তি" data-subtitle="বিখ্যাত ব্যক্তিদের কথা" data-icon="<img src='https://www.svgrepo.com/show/508499/quote.svg' alt='Quote Icon'> " data-type="text">
+            <p>অসৎ আনন্দের চেয়ে পবিত্র বেদনা অনেক ভালো। - হোমার</p>
+        </div>
+        
+        <div class="category-data" data-key="developer-contact" data-title="ডেভেলপারের সাথে যোগাযোগ" data-subtitle="যেকোনো প্রয়োজনে" data-icon="<img src='https://www.svgrepo.com/show/494490/developer.svg' alt='Developer Icon'> " data-is-contact="true"></div>
+
+    </div>
+    <!-- =================== ক্যাপশন ডেটা এখানে শেষ ====================== -->
+
+    <script>
+        /**
+         * এই ফাইলটি Caption Buzz ওয়েবসাইটের সম্পূর্ণ ক্লায়েন্ট-সাইড লজিক পরিচালনা করে।
+         */
+
+        // গ্লোবাল ভ্যারিয়েবল এবং DOM এলিমেন্টের রেফারেন্স
+        const captionsData = {};
+        const screens = {
+            'category-screen': document.getElementById('category-screen'),
+            'caption-screen': document.getElementById('caption-screen'),
+            'contact-screen': document.getElementById('contact-screen'),
+            'tasbih-screen': document.getElementById('tasbih-screen') // নতুন তাসবিহ স্ক্রিন
+        };
+        const categoryGrid = document.querySelector('.category-grid');
+        const captionList = document.getElementById('caption-list');
+        const captionHeaderTitle = document.getElementById('caption-header-title');
+        const themeToggle = document.getElementById('theme-toggle');
+
+        // তাসবিহ কাউন্টারের জন্য DOM এলিমেন্ট
+        const tasbihCounterDisplay = document.getElementById('tasbih-counter-display');
+        const currentTasbihDisplay = document.getElementById('current-tasbih-display');
+        const tasbihCountButton = document.getElementById('tasbih-count-button');
+        const tasbihResetButton = document.getElementById('tasbih-reset-button');
+        const tasbihSelectionContainer = document.querySelector('.tasbih-selection');
+
+        // তাসবিহ কাউন্টারের স্টেট
+        let currentTasbihCount = 0;
+        let selectedTasbih = "সুবহানাল্লাহ";
+
+        /**
+         * HTML এর data-source div থেকে ডেটা পার্স করে captionsData অবজেক্ট তৈরি করে।
+         */
+        function parseHtmlData() {
+            const dataContainer = document.getElementById('data-source');
+            dataContainer.querySelectorAll('.category-data').forEach(catElement => {
+                const key = catElement.dataset.key;
+                if (!key) return;
+
+                const contentType = catElement.dataset.type || 'text';
+                const items = [];
+
+                if (contentType === 'text') {
+                    catElement.querySelectorAll('p').forEach(p => items.push(p.innerHTML));
+                } else if (contentType === 'image') {
+                    catElement.querySelectorAll('img').forEach(img => items.push(img.getAttribute('src')));
+                }
+                
+                captionsData[key] = {
+                    title: catElement.dataset.title,
+                    subtitle: catElement.dataset.subtitle,
+                    icon: catElement.dataset.icon,
+                    isContact: catElement.dataset.isContact === 'true',
+                    type: contentType,
+                    items: items
+                };
+            });
+        }
+
+        /**
+         * নির্দিষ্ট স্ক্রিন দেখানোর জন্য এই ফাংশনটি ব্যবহৃত হয়।
+         */
+        function showScreen(screenName) {
+            Object.values(screens).forEach(screen => screen.style.display = 'none');
+            screens[screenName].style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        /**
+         * হোমপেজে সমস্ত ক্যাটাগরি কার্ড প্রদর্শন করে।
+         */
+        function displayCategories() {
+            categoryGrid.innerHTML = '';
+            for (const key in captionsData) {
+                const category = captionsData[key];
+                const item = document.createElement('div');
+                item.className = 'category-item';
+                item.innerHTML = `<div class="icon">${category.icon}</div><h3>${category.title}</h3><p>${category.subtitle}</p>`;
+                
+                item.addEventListener('click', () => {
+                    if (category.isContact) {
+                        showScreen('contact-screen');
+                    } else if (category.type === 'interactive') {
+                        showScreen('tasbih-screen');
+                    } else {
+                        displayItems(key);
+                        showScreen('caption-screen');
+                    }
+                });
+                categoryGrid.appendChild(item);
+            }
+        }
+
+        /**
+         * নির্দিষ্ট ক্যাটাগরির আইটেমগুলো (টেক্সট বা ছবি) প্রদর্শন করে।
+         */
+        function displayItems(categoryKey) {
+            const category = captionsData[categoryKey];
+            captionHeaderTitle.textContent = category.title;
+            captionList.innerHTML = category.items.length ? '' : '<p>এই ক্যাটাগরিতে এখনো কোনো কন্টেন্ট যোগ করা হয়নি।</p>';
+            
+            category.items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'caption-card';
+
+                if (category.type === 'text') {
+                    card.innerHTML = `<p class="caption-text">${item}</p>
+                        <div class="actions">
+                            <button class="action-button copy-btn">📋 কপি</button>
+                            <button class="action-button share-btn">🔗 শেয়ার</button>
+                        </div>`;
+                } else if (category.type === 'image') {
+                    card.classList.add('image-card');
+                    card.innerHTML = `<img src="${item}" class="caption-image" alt="${category.title} Image">`;
+                }
+                captionList.appendChild(card);
+            });
+        }
+
+        /**
+         * তাসবিহ কাউন্টার এর সমস্ত ইভেন্ট এবং লজিক পরিচালনা করে।
+         */
+        function initializeTasbihCounter() {
+            tasbihCountButton.addEventListener('click', () => {
+                currentTasbihCount++;
+                tasbihCounterDisplay.textContent = currentTasbihCount;
+            });
+
+            tasbihResetButton.addEventListener('click', () => {
+                currentTasbihCount = 0;
+                tasbihCounterDisplay.textContent = currentTasbihCount;
+            });
+
+            tasbihSelectionContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('tasbih-option')) {
+                    tasbihSelectionContainer.querySelectorAll('.tasbih-option').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+                    selectedTasbih = e.target.dataset.tasbih;
+                    currentTasbihDisplay.textContent = selectedTasbih;
+                    currentTasbihCount = 0;
+                    tasbihCounterDisplay.textContent = currentTasbihCount;
+                }
+            });
+        }
+
+        // কপি এবং শেয়ার বাটনের জন্য ইভেন্ট লিসেনার
+        captionList.addEventListener('click', function(e) {
+            const button = e.target.closest('.action-button');
+            if (!button) return;
+
+            const card = button.closest('.caption-card');
+            const text = card.querySelector('.caption-text').innerText;
+
+            if (button.classList.contains('copy-btn')) {
+                navigator.clipboard.writeText(text).then(() => {
+                    button.textContent = '✅ কপিড!';
+                    button.classList.add('copied');
+                    setTimeout(() => {
+                        button.innerHTML = '📋 কপি';
+                        button.classList.remove('copied');
+                    }, 2000);
+                }).catch(() => {
+                    alert('কপি করতে সমস্যা হয়েছে।');
+                });
+            }
+
+            if (button.classList.contains('share-btn')) {
+                if (navigator.share) {
+                    navigator.share({ title: 'Caption Buzz থেকে', text }).catch(console.error);
+                } else {
+                    alert('আপনার ব্রাউজার শেয়ার অপশন সাপোর্ট করে না।');
+                }
+            }
+        });
+
+        // থিম পরিবর্তন করার জন্য ইভেন্ট লিসেনার
+        themeToggle.addEventListener('change', () => {
+            document.body.setAttribute('data-theme', themeToggle.checked ? 'dark' : '');
+        });
+
+        // রাইট-ক্লিক ব্লক করা
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        // পেজ লোড হওয়ার পর মূল ফাংশনগুলো কল করা
+        document.addEventListener('DOMContentLoaded', () => {
+            parseHtmlData();
+            displayCategories();
+            initializeTasbihCounter();
+        });
+    </script>
+</body>
+</html>
