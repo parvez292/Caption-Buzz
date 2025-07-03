@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Caption Buzz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #00796b; --secondary-color: #f4f6f8; --font-color: #333;
+            --card-bg-color: #ffffff; --shadow-color: rgba(0, 0, 0, 0.08); --border-color: #e0e0e0;
+            --header-text-color: #ffffff;
+        }
+        body[data-theme="dark"] {
+            --primary-color: #00897b; --secondary-color: #121212; --font-color: #e0e0e0;
+            --card-bg-color: #1e1e1e; --shadow-color: rgba(0, 0, 0, 0.2); --border-color: #333;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Hind Siliguri', sans-serif; background-color: var(--secondary-color);
+            color: var(--font-color); transition: background-color 0.3s ease, color 0.3s ease;
+            -webkit-user-select: none; -ms-user-select: none; user-select: none;
+        }
+        .container { padding: 15px; max-width: 100%; overflow-x: hidden; }
+        .header {
+            background-color: var(--primary-color); color: var(--header-text-color); padding: 15px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 1000; transition: background-color 0.3s ease;
+        }
+        .header-content { display: flex; align-items: center; }
+        .header-logo { width: 32px; height: 32px; border-radius: 50%; margin-right: 12px; background-color: #fff; padding: 2px; }
+        .header h1 { font-size: 1.3em; margin: 0; }
+        .back-button { background: none; border: none; color: var(--header-text-color); font-size: 1.8em; cursor: pointer; margin-right: 15px; }
+        .theme-switcher { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .theme-switcher input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #4caf50; }
+        input:checked + .slider:before { transform: translateX(22px); }
+        #category-screen, #caption-screen, #contact-screen { display: block; }
+        #caption-screen, #contact-screen { display: none; }
+        .main-title { text-align: center; margin: 20px 0; color: var(--primary-color); font-size: 1.8em; font-weight: 700; transition: color 0.3s ease; }
+        .category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .category-item { background-color: var(--card-bg-color); border-radius: 12px; padding: 20px 15px; text-align: center; cursor: pointer; box-shadow: 0 4px 12px var(--shadow-color); border: 1px solid var(--border-color); transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, border-color 0.3s ease; }
+        .category-item:hover { transform: translateY(-6px); box-shadow: 0 8px 20px var(--shadow-color); }
+        .category-item .icon { font-size: 2.5em; margin-bottom: 10px; }
+        .category-item h3 { font-size: 1.1em; font-weight: 600; margin-bottom: 5px; }
+        .category-item p { font-size: 0.8em; color: #757575; }
+        body[data-theme="dark"] .category-item p { color: #aaa; }
+        #caption-list { display: flex; flex-direction: column; gap: 15px; }
+        .caption-card { background-color: var(--card-bg-color); border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px var(--shadow-color); border: 1px solid var(--border-color); transition: background-color 0.3s ease, border-color 0.3s ease; }
+        .caption-card .caption-text { font-size: 1.1em; line-height: 1.7; margin-bottom: 20px; }
+        /* ======== নতুন যোগ করা সিএসএস এখানে শুরু ======== */
+/* ছবির জন্য নতুন স্টাইল */
+.caption-card.image-card { padding: 10px; }
+.caption-card .caption-image { max-width: 100%; border-radius: 8px; display: block; }
+/* ======== নতুন যোগ করা সিএসএস এখানে শেষ ======== */
+        .actions { display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--border-color); padding-top: 15px; transition: border-color 0.3s ease; }
+        .action-button { background: none; border: none; color: #555; cursor: pointer; font-size: 0.9em; font-weight: 600; padding: 8px 12px; border-radius: 8px; display: flex; align-items: center; gap: 8px; transition: background-color 0.2s ease, color 0.2s ease; }
+        body[data-theme="dark"] .action-button { color: #bbb; }
+        .action-button:hover { background-color: var(--secondary-color); }
+        .action-button.copied { color: var(--primary-color); font-weight: 700; }
+        .contact-links { display: flex; flex-direction: column; gap: 20px; margin-top: 20px; }
+        .contact-link-card { display: flex; align-items: center; gap: 20px; background-color: var(--card-bg-color); padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px var(--shadow-color); text-decoration: none; color: var(--font-color); transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease; }
+        .contact-link-card:hover { transform: translateY(-6px); box-shadow: 0 8px 20px var(--shadow-color); }
+        .contact-link-card .contact-icon { width: 40px; height: 40px; }
+        .contact-link-card .contact-info h3 { margin: 0; font-size: 1.2em; }
+    Gemini 2.5 Pro
+Chat Prompt
+ThinkingThoughts
+(experimental)
+Auto
+Expand to view model thoughts
+
+chevron_right
+ThinkingThoughts
+(experimental)
+Auto
+Expand to view model thoughts
+
+chevron_right
+ThinkingThoughts
+(experimental)
+Auto
+Expand to view model thoughts
+
+chevron_right
+ThinkingThoughts
+(experimental)
+Auto
+Expand to view model thoughts
+
+chevron_right
+ThinkingThoughts
+(experimental)
+Auto
+Expand to view model thoughts
+
+chevron_right
+ThinkingThoughts
+(experimental)
+Auto
+Expand to view model thoughts
+
+chevron_right
+ThinkingThoughts
+(experimental)
+Auto
+Expand to view model thoughts
+
+chevron_right
+ThinkingThoughts
+(experimental)
+Auto
+Expand to view model thoughts
+
+chevron_right
+ThinkingThoughts
+(experimental)
+Auto
+Expand to view model thoughts
+
+chevron_right
+ThinkingThoughts
+(experimental)
+Auto
+Expand to view model thoughts
+
+chevron_right
+ThinkingThoughts
+(experimental)
+Auto
+Expand to view model thoughts
+
+chevron_right
+অবশ্যই! আপনার ওয়েবসাইটটি আমি আবার দেখলাম এবং এর ডিজাইন ও ফাংশনালিটি খুবই চমৎকার। আপনার নতুন আইডিয়াগুলোও দারুণ! একটি ক্যাপশন অ্যাপের সাথে একটি ডিজিটাল তাসবিহ যুক্ত করা এটিকে আরও বেশি ব্যবহারযোগ্য এবং আকর্ষণীয় করে তুলবে।
+আপনার অনুরোধ অনুযায়ী, আমি দুটি নতুন ক্যাটাগরি তৈরি করেছি:
+ছোট কবিতা: এটি আগের টেক্সট-ভিত্তিক ক্যাটাগরিগুলোর মতোই কাজ করবে।
+তাসবিহ: এটি একটি সম্পূর্ণ নতুন, ইন্টারেক্টিভ ডিজিটাল তাসবিহ কাউন্টার, যার একটি সুন্দর এবং আধুনিক ইউজার ইন্টারফেস (UI) রয়েছে।
+যেহেতু আপনি আপনার বিদ্যমান জাভাস্ক্রিপ্ট কোড দিয়েছেন এবং সেটিকে এডিট করতে বলেছেন, আমি ঠিক সেভাবেই কোডটি পরিবর্তন করেছি। নিচে আমি সম্পূর্ণ সংশোধিত HTML, নতুন CSS, এবং সম্পূর্ণ সংশোধিত JavaScript কোডটি ধাপে ধাপে দিচ্ছি।
+আপনাকে যা করতে হবে:
+সম্পূর্ণ HTML কোড: নিচের সম্পূর্ণ HTML কোডটি কপি করে আপনার index.html ফাইলের পুরোনো কোডের সাথে সম্পূর্ণ প্রতিস্থাপন (replace) করুন।
+নতুন CSS কোড: এই নতুন CSS কোডটুকু আপনার HTML ফাইলের <style> ট্যাগের ভেতরে, অন্য CSS কোডগুলোর শেষে যোগ করুন।
+সম্পূর্ণ JavaScript কোড: নিচের সম্পূর্ণ JavaScript কোডটি আপনার HTML ফাইলের <script> ট্যাগের পুরোনো কোডের সাথে সম্পূর্ণ প্রতিস্থাপন (replace) করুন।
+১. সম্পূর্ণ সংশোধিত HTML কোড
+এই কোডে নতুন "তাসবিহ" স্ক্রিন এবং data-source সেকশনে নতুন ক্যাটাগরিগুলো যোগ করা হয়েছে।
+Generated html
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Caption Buzz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #00796b; --secondary-color: #f4f6f8; --font-color: #333;
+            --card-bg-color: #ffffff; --shadow-color: rgba(0, 0, 0, 0.08); --border-color: #e0e0e0;
+            --header-text-color: #ffffff;
+        }
+        body[data-theme="dark"] {
+            --primary-color: #00897b; --secondary-color: #121212; --font-color: #e0e0e0;
+            --card-bg-color: #1e1e1e; --shadow-color: rgba(0, 0, 0, 0.2); --border-color: #333;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Hind Siliguri', sans-serif; background-color: var(--secondary-color);
+            color: var(--font-color); transition: background-color 0.3s ease, color 0.3s ease;
+            -webkit-user-select: none; -ms-user-select: none; user-select: none;
+        }
+        .container { padding: 15px; max-width: 100%; overflow-x: hidden; }
+        .header {
+            background: linear-gradient(45deg, #00796b, #004d40);
+            color: var(--header-text-color); padding: 15px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 1000;
+        }
+        .header-content { display: flex; align-items: center; }
+        .header-logo { width: 32px; height: 32px; border-radius: 50%; margin-right: 12px; background-color: #fff; padding: 2px; }
+        .header h1 { font-size: 1.3em; margin: 0; }
+        .back-button { background: none; border: none; color: var(--header-text-color); font-size: 1.8em; cursor: pointer; margin-right: 15px; }
+        .theme-switcher { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .theme-switcher input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.4); transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #4caf50; }
+        input:checked + .slider:before { transform: translateX(22px); }
+        #category-screen, #caption-screen, #contact-screen, #tasbih-screen { display: block; } /* tasbih-screen যোগ করা হলো */
+        #caption-screen, #contact-screen, #tasbih-screen { display: none; } /* tasbih-screen যোগ করা হলো */
+        .main-title { text-align: center; margin: 20px 0; color: var(--primary-color); font-size: 1.8em; font-weight: 700; transition: color 0.3s ease; }
+        .category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .category-item { background-color: var(--card-bg-color); border-radius: 12px; padding: 20px 15px; text-align: center; cursor: pointer; box-shadow: 0 4px 12px var(--shadow-color); border: 1px solid var(--border-color); transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, border-color 0.3s ease; }
+        .category-item:hover { transform: translateY(-6px); box-shadow: 0 8px 20px var(--shadow-color); }
+        .category-item .icon { font-size: 2.5em; margin-bottom: 10px; }
+        .category-item h3 { font-size: 1.1em; font-weight: 600; margin-bottom: 5px; }
+        .category-item p { font-size: 0.8em; color: #757575; }
+        body[data-theme="dark"] .category-item p { color: #aaa; }
+        #caption-list { display: flex; flex-direction: column; gap: 15px; }
+        .caption-card { background-color: var(--card-bg-color); border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px var(--shadow-color); border: 1px solid var(--border-color); transition: background-color 0.3s ease, border-color 0.3s ease; }
+        .caption-card .caption-text { font-size: 1.1em; line-height: 1.7; margin-bottom: 20px; white-space: pre-wrap; }
+        .caption-card.image-card { padding: 10px; }
+        .caption-card .caption-image { max-width: 100%; border-radius: 8px; display: block; }
+        .actions { display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--border-color); padding-top: 15px; transition: border-color 0.3s ease; }
+        .action-button { background: none; border: none; color: #555; cursor: pointer; font-size: 0.9em; font-weight: 600; padding: 8px 12px; border-radius: 8px; display: flex; align-items: center; gap: 8px; transition: background-color 0.2s ease, color 0.2s ease; }
+        body[data-theme="dark"] .action-button { color: #bbb; }
+        .action-button:hover { background-color: var(--secondary-color); }
+        .action-button.copied { color: var(--primary-color); font-weight: 700; }
+        .contact-links { display: flex; flex-direction: column; gap: 20px; margin-top: 20px; }
+        .contact-link-card { display: flex; align-items: center; gap: 20px; background-color: var(--card-bg-color); padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px var(--shadow-color); text-decoration: none; color: var(--font-color); transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease; }
+        .contact-link-card:hover { transform: translateY(-6px); box-shadow: 0 8px 20px var(--shadow-color); }
+        .contact-link-card .contact-icon { width: 40px; height: 40px; }
+        .contact-link-card .contact-info h3 { margin: 0; font-size: 1.2em; }
+        
+        /* ================== নতুন তাসবিহ CSS এখানে শুরু ===================== */
+        .tasbih-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+        .tasbih-selection {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+        .tasbih-option {
+            background-color: var(--card-bg-color);
+            border: 2px solid var(--border-color);
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .tasbih-option.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        .tasbih-display {
+            background-color: var(--card-bg-color);
+            border-radius: 12px;
+            padding: 20px;
+            width: 100%;
+            max-width: 350px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px var(--shadow-color);
+        }
+        .tasbih-display .current-tasbih {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            min-height: 40px;
+        }
+        .tasbih-display .counter {
+            font-size: 4em;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .tasbih-main-button {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, var(--primary-color), #004d40);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0, 121, 107, 0.3);
+            transition: all 0.2s ease-out;
+            color: white;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .tasbih-main-button:active {
+            transform: scale(0.95);
+            box-shadow: 0 5px 10px rgba(0, 121, 107, 0.4);
+        }
+        .tasbih-reset-button {
+            margin-top: 25px;
+            background-color: #ef5350;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .tasbih-reset-button:hover {
+            background-color: #d32f2f;
+        }
+        /* ================== নতুন তাসবিহ CSS এখানে শেষ ===================== */
+    </style>
+</head>
+<body>
+
+    <div id="category-screen">
+        <div class="header">
+            <div class="header-content">
+                <img src="https://www.svgrepo.com/show/134823/speech-bubble.svg" class="header-logo" alt="Logo">
+                <h1>Caption Buzz</h1>
+            </div>
+            <label class="theme-switcher">
+                <input type="checkbox" id="theme-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="container">
+            <h2 class="main-title">ক্যাপশনের দুনিয়া</h2>
+            <div class="category-grid"></div>
+        </div>
+    </div>
+
+    <div id="caption-screen">
+        <div class="header">
+            <div class="header-content">
+                <button class="back-button" onclick="showScreen('category-screen')">&#8592;</button>
+                <h1 id="caption-header-title">ক্যাপশন</h1>
+            </div>
+        </div>
+        <div class="container"><div id="caption-list"></div></div>
+    </div>
+    
+    <div id="contact-screen">
+         <div class="header">
+            <div class="header-content">
+                <button class="back-button" onclick="showScreen('category-screen')">&#8592;</button>
+                <h1>যোগাযোগ করুন</h1>
+            </div>
+         </div>
+        <div class="container">
+            <div class="contact-links">
+                <a href="https://wa.me/8801600039783" target="_blank" class="contact-link-card"><img src="https://www.svgrepo.com/show/513060/whatsapp-128.svg" alt="WhatsApp" class="contact-icon"><div class="contact-info"><h3>WhatsApp</h3></div></a>
+                <a href="https://www.facebook.com/parvez.akanda.2025" target="_blank" class="contact-link-card"><img src="https://www.svgrepo.com/show/516209/facebook-messenger.svg" alt="Facebook" class="contact-icon"><div class="contact-info"><h3>Facebook</h3></div></a>
+                <a href="https://t.me/@annonymous707" target="_blank" class="contact-link-card"><img src="https://www.svgrepo.com/show/521874/telegram.svg" alt="Telegram" class="contact-icon"><div class="contact-info"><h3>Telegram</h3></div></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- ================== ক্যাপশন ডেটা এখানে শুরু ===================== -->
+    <!-- আপনাকে শুধু এই সেকশনেই কাজ করতে হবে। অন্য কোথাও কিছু করার দরকার নেই। -->
+    <!-- ===================================================================== -->
+    <div id="data-source" style="display: none;">
+
+        <!-- ক্যাটাগরি: ফানি স্ট্যাটাস -->
+        <div class="category-data" data-key="funny-status" data-title="ফানি স্ট্যাটাস" data-subtitle="বাংলার সেরা ফানি পোস্ট" data-icon="😂">
+            <p>—এতো যে পেকে গেছো বয়স কত<!!😐</p>
+            <p>তোমরা যারা bf থাকার পর ফ্রেন্ড রিকোয়েস্ট দেও তাদের কাছে একটা প্রশ্ন, আচ্ছা বোনরা তোমারা কী দাম্পত্য জীবনে অসুখী.....!🤔😐</p>
+            <p>"চশমা পরা মেয়েরা অনেক কিউট হয়..😉🙃<br>""কিন্তু কানা তো কানাই...😉🙃🙃🙃🤭</p>
+            <p>মূলত বউ সেজে ছবি তোলার জন্য মেয়েরা বিয়ে করে, <br>না হলে জামাই আহামরি কিছু না 😸🫣😛 </p>
+            <p>চুড়ি+শাড়ী+টিপ কিনে দিলে কি পটবা.!🥹✨💭</p>
+            <p>বিয়ে যার সাথেই হোক না কেন, পোষ্ট দিবো ১০ বছরের পুর্ণতা!🙂</p>
+            <p>চেহা'রা টা আরেকটু সুন্দর হলে৷ আমিও কারও রাতের ঘুম কে/ড়ে নিতাম 🙂</p>
+            <p>আমাকে পটানোর দোয়া👶 <br><b>ポボホㅫㆊㆅㅷㅺㆊㆉㆈ💖</b><br>শিখে নাও🐸</p>
+            <p>~ আমার সাথে ঝগড়া করতে আইসো না..!!😒🥱<br>এমন তাবিজ করমু..!!<br> পরে আইসা বলবা..!!🧐🙂<br>~ মুঝসে সাদি কারো গি..!!🙈🤭</p>
+            <p>কট খেয়ে বিয়ে করে,<br>আবার ক্যাপশন দেয় পূর্নতা। 🙂</p>
+            <p>তোমার sorry তুমি পকেটে ঢু'কাও !<br> আমাকে hurt করলে আমি এমন ভাবে hurt করবো যে পরে google রে গিয়া ask করবা " How to stop crying " :)</p>
+            <p>- প্রিয়জনের শূন্যতার থেকে বেশি প্যারা দিচ্ছে বিদ্যুৎ শূন্যতা!🥹</p>
+            <p>প্রেম নাকি কাঠাঁলের আঠা… তাহলে ব্রেকআপ কি সরিষার তেল? 🤔🍯</p>
+            <p>দাদু:- তোর স্কুলের স্যার আমাকে রাস্তায় দেখে অজ্ঞান হয়ে গেল কেন? আমি:- তুমি মারা গেছো বলে আমি এক সপ্তাহের ছুটি নিয়েছিলাম। 🐸</p>
+            <p>চায়ের দোকানের কাপগুলো এতটাই ছোট করে দিয়েছে যে মনে হয় চা খাচ্ছি না পোলিও ড্রপ খাচ্ছি! ☕</p>
+            <p>পরীক্ষার হলে প্রথম ৩০ মিনিট আমি প্রশ্নপত্রের সাথে পরিচিত হই, পরের ৩০ মিনিট উত্তরপত্রের সাথে, বাকি সময়টা গার্ডের সাথে। 😜</p>
+        </div>
+
+        <!-- ক্যাটাগরি: রোমান্টিক ক্যাপশন -->
+        <div class="category-data" data-key="love-status" data-title="রোমান্টিক ক্যাপশন" data-subtitle="ভালোবাসার মিষ্টি কথা" data-icon="😍">
+            <p>তুমি সেই কবিতা, যা আমি প্রতিদিন পড়ি কিন্তু কখনো শেষ হয় না। ❤️</p>
+            <p>তোমার চোখে আমার সর্বনাশ দেখেও আমি বারবার তোমার দিকেই তাকাই।</p>
+            <p>পৃথিবীর সবটুকু সুখ হয়তো তোমার আঁচলেই বাঁধা আছে। 🥰</p>
+        </div>
+
+        <!-- ক্যাটাগরি: কষ্টের স্ট্যাটাস -->
+        <div class="category-data" data-key="sad-status" data-title="কষ্টের স্ট্যাটাস" data-subtitle="কিছু না বলা কথা" data-icon="😔">
+            <p>তোমার স্মৃতি দগ্ধ করে,<br>হৃদয় জুড়ে বৃষ্টি ঝরে। 🌧️🖤</p>
+            <p>পাশে থাকলেই সবাই আপন হয়না <br>মির জাফর ও কিন্তু নবাব সিরাজউদ্দৌলার পাশে ছিলো</p>
+            <p>হুম মায়াবী মানুষেরাই নিষ্ঠুর হয়..<br>তাইতো মায়া লাগানোর পরেই ছেড়ে চলে যায়।😢🫰</p>
+            <p>মানুষের হার্টের দাম ১.৪ মিলিয়ন ডলার আর আমি তোমারে এমনি দিয়ে দিছি কিন্তু আফসোস বুঝলা না আমায় 😅💔</p>
+            <p>বর্ষা ঘনাক শহর জুড়ে,<br>রাত্রি হোক ভোর <br><br>🌄মন খারাপে'রা পথের বাঁকে, <br>সঙ্গী হোক মোর 😌🖤</p>
+            <p>চাঁদের আলো যেমন পূর্ণিমার রাতে কাঁদে,<br>তেমনি আমিও কাঁদি, তোমার অনুপস্থিতিতে... 🌌🥀</p>
+            <p>কিছু গল্প অসমাপ্তই সুন্দর, কারণ সমাপ্তিটা হয়তো আরও বেশি কষ্টের হতো।</p>
+            <p>যেখানে গুরুত্ব নেই, সেখানে চুপচাপ সরে আসাই বুদ্ধিমানের কাজ।</p>
+            <p>আজকাল একাকীত্বটাও ভালো লাগে, কারণ এখানে কেউ কষ্ট দেওয়ার নেই।</p>
+        </div>
+
+        <!-- ক্যাটাগরি: অ্যাটিটিউড ক্যাপশন -->
+        <div class="category-data" data-key="attitude-status" data-title="অ্যাটিটিউড ক্যাপশন" data-subtitle="নিজের মতো করে বাঁচো" data-icon="😈">
+            <p>দুনিয়াতে টাকায় আপন,<br>বাকি সব বিজ্ঞাপন 🥱</p>
+            <p>—এড়িয়ে চলা স্মার্ট বন্ধুর চেয়ে,<br>"স্বরণ করা কামলা বন্ধুই..<br>উত্তম...)🖤</p>
+            <p>🗣মস্তিষ্কে যখন সফলতা ঘুরে😇,, প্রেম তখন হাওয়ায় উড়ে😎</p>
+            <p>তুমি যতো সুন্দরই হওনা কেন,, পুরুষের রাগ যদি একবার অভিমানে পরিণত হয় তাহলে শুধু তোমাকে কেন পুরুষ তার রাজপ্রাসাদ ছেড়ে আসারো ক্ষমতা রাখে✌</p>
+            <p>আমি যেমন, তেমনই থাকবো। কারো ভালো লাগার জন্য নিজেকে বদলানোর সময় নেই।</p>
+            <p>আমার নীরবতাকে দুর্বলতা ভেবো না, ঝড়ের আগে পরিবেশ শান্তই থাকে।</p>
+            <p>সবাইকে খুশি করার দায়িত্ব আমি নিইনি।</p>
+        </div>
+
+        
+
+        <!-- ক্যাটাগরি: ইসলামিক স্ট্যাটাস -->
+        <div class="category-data" data-key="islamic-status" data-title="ইসলামিক স্ট্যাটাস" data-subtitle="ঈমান ও আমল" data-icon="🕌">
+            <p>হে আল্লাহ,<br>আমি ছাড়া তো আপনার অনেক বান্দা আছে,<br>কিন্তু আপনি ছাড়া আমার তো কেউ নাই</p>
+            <p>আল্লাহর রহমত আমাদের পথে আলো দেয়, অন্ধকারে দিশা দেখায়। 🌟✨</p>
+            <p>হে আল্লাহ, এমন জীবন দিও না যেখানে তুমি ছাড়া আর সবই আছে।</p>
+            <p>সবচেয়ে বড় বিজয় হলো নিজের নফসের বিরুদ্ধে জয় লাভ করা।</p>
+            <p>আলহামদুলিল্লাহ্‌, প্রতিটি নিঃশ্বাসের জন্য।</p>
+        </div>
+
+        <!-- ক্যাটাগরি: মনীষীদের উক্তি -->
+        <div class="category-data" data-key="wise-quotes" data-title="মনীষীদের উক্তি" data-subtitle="বিখ্যাত ব্যক্তিদের কথা" data-icon="📜">
+            <p>অসৎ আনন্দের চেয়ে পবিত্র বেদনা অনেক ভালো। - হোমার</p>
+            <p>ব্যর্থতার ছাই থেকে সফলতার প্রাসাদ তৈরি হয়। - ডেল কার্নেগী</p>
+            <p>যে নিজেকে অক্ষম ভাবে, তাকে কেউ সাহায্য করতে পারে না। - জন এন্ডারসন</p>
+        </div>
+
+        <!-- নতুন যোগ করা ক্যাটাগরি: 18+ Adult -->
+        <div class="category-data" data-key="adult-captions" data-title="18+ Adult" data-subtitle="শুধুমাত্র প্রাপ্তবয়স্কদের জন্য" data-icon="🔞" data-type="text">
+            <p>সুন্দর বাড়ির গেট সবসময় বড় হয়,<br>কথাটি আদুও কোনো বাড়ির জন্য ছিল না😎</p>
+            <p>গাড়ি যতই সুন্দর হোক না কেনো, সাইলেন্সার পাইপ কিন্তু কালোই হয়,। আর এই কথাটা ও কোনো গাড়ির জন্য ছিল না🤘🌸😎</p>
+            <p>এখানে আপনার প্রাপ্তবয়স্কদের জন্য ক্যাপশন যোগ করুন।</p>
+            <p>দামী গাড়ীর সিট একটু বেশি বড় হয় ,<br>কথা টা কোনো গাড়ীর ছিলো না <br>😒×ধন্যবাদ😷</p>
+        </div>
+
+        <!-- নতুন যোগ করা ক্যাটাগরি: Memes Zone (শুধুমাত্র ছবির জন্য) -->
+        <div class="category-data" data-key="memes-zone" data-title="Memes Zone" data-subtitle="Daily Dose of Fun" data-icon="🤣" data-type="image">
+            <!-- এখানে p ট্যাগের পরিবর্তে img ট্যাগ ব্যবহার করুন -->
+            <!-- ছবির লিংক "images/meme1.jpg" এভাবে দিন অথবা অনলাইন লিংক ব্যবহার করুন -->
+            <img src="https://via.placeholder.com/400x400.png?text=Meme+1" alt="Meme 1">
+            <img src="https://via.placeholder.com/400x500.png?text=Meme+2" alt="Meme 2">
+        </div>
+
+
+        Gemini 2.5 Pro
+Chat Prompt
+ThinkingThoughts
+(experimental)
+Auto
+Expand to view model thoughts
+
+chevron_right
+ThinkingThoughts
+(experimental)
+Auto
+Expand to view model thoughts
+
+chevron_right
+ThinkingThoughts
+(experimental)
+Auto
+Expand to view model thoughts
+
+chevron_right
+ThinkingThoughts
+(experimental)
+Auto
+Expand to view model thoughts
+
+chevron_right
+ThinkingThoughts
+(experimental)
+Auto
+Expand to view model thoughts
+
+chevron_right
+ThinkingThoughts
+(experimental)
+Auto
+Expand to view model thoughts
+
+chevron_right
+ThinkingThoughts
+(experimental)
+Auto
+Expand to view model thoughts
+
+chevron_right
+ThinkingThoughts
+(experimental)
+Auto
+Expand to view model thoughts
+
+chevron_right
+ThinkingThoughts
+(experimental)
+Auto
+Expand to view model thoughts
+
+chevron_right
+ThinkingThoughts
+(experimental)
+Auto
+Expand to view model thoughts
+
+chevron_right
+ThinkingThoughts
+(experimental)
+Auto
+Expand to view model thoughts
+
+chevron_right
+অবশ্যই! আপনার ওয়েবসাইটটি আমি আবার দেখলাম এবং এর ডিজাইন ও ফাংশনালিটি খুবই চমৎকার। আপনার নতুন আইডিয়াগুলোও দারুণ! একটি ক্যাপশন অ্যাপের সাথে একটি ডিজিটাল তাসবিহ যুক্ত করা এটিকে আরও বেশি ব্যবহারযোগ্য এবং আকর্ষণীয় করে তুলবে।
+আপনার অনুরোধ অনুযায়ী, আমি দুটি নতুন ক্যাটাগরি তৈরি করেছি:
+ছোট কবিতা: এটি আগের টেক্সট-ভিত্তিক ক্যাটাগরিগুলোর মতোই কাজ করবে।
+তাসবিহ: এটি একটি সম্পূর্ণ নতুন, ইন্টারেক্টিভ ডিজিটাল তাসবিহ কাউন্টার, যার একটি সুন্দর এবং আধুনিক ইউজার ইন্টারফেস (UI) রয়েছে।
+যেহেতু আপনি আপনার বিদ্যমান জাভাস্ক্রিপ্ট কোড দিয়েছেন এবং সেটিকে এডিট করতে বলেছেন, আমি ঠিক সেভাবেই কোডটি পরিবর্তন করেছি। নিচে আমি সম্পূর্ণ সংশোধিত HTML, নতুন CSS, এবং সম্পূর্ণ সংশোধিত JavaScript কোডটি ধাপে ধাপে দিচ্ছি।
+আপনাকে যা করতে হবে:
+সম্পূর্ণ HTML কোড: নিচের সম্পূর্ণ HTML কোডটি কপি করে আপনার index.html ফাইলের পুরোনো কোডের সাথে সম্পূর্ণ প্রতিস্থাপন (replace) করুন।
+নতুন CSS কোড: এই নতুন CSS কোডটুকু আপনার HTML ফাইলের <style> ট্যাগের ভেতরে, অন্য CSS কোডগুলোর শেষে যোগ করুন।
+সম্পূর্ণ JavaScript কোড: নিচের সম্পূর্ণ JavaScript কোডটি আপনার HTML ফাইলের <script> ট্যাগের পুরোনো কোডের সাথে সম্পূর্ণ প্রতিস্থাপন (replace) করুন।
+১. সম্পূর্ণ সংশোধিত HTML কোড
+এই কোডে নতুন "তাসবিহ" স্ক্রিন এবং data-source সেকশনে নতুন ক্যাটাগরিগুলো যোগ করা হয়েছে।
+Generated html
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Caption Buzz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #00796b; --secondary-color: #f4f6f8; --font-color: #333;
+            --card-bg-color: #ffffff; --shadow-color: rgba(0, 0, 0, 0.08); --border-color: #e0e0e0;
+            --header-text-color: #ffffff;
+        }
+        body[data-theme="dark"] {
+            --primary-color: #00897b; --secondary-color: #121212; --font-color: #e0e0e0;
+            --card-bg-color: #1e1e1e; --shadow-color: rgba(0, 0, 0, 0.2); --border-color: #333;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Hind Siliguri', sans-serif; background-color: var(--secondary-color);
+            color: var(--font-color); transition: background-color 0.3s ease, color 0.3s ease;
+            -webkit-user-select: none; -ms-user-select: none; user-select: none;
+        }
+        .container { padding: 15px; max-width: 100%; overflow-x: hidden; }
+        .header {
+            background: linear-gradient(45deg, #00796b, #004d40);
+            color: var(--header-text-color); padding: 15px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 1000;
+        }
+        .header-content { display: flex; align-items: center; }
+        .header-logo { width: 32px; height: 32px; border-radius: 50%; margin-right: 12px; background-color: #fff; padding: 2px; }
+        .header h1 { font-size: 1.3em; margin: 0; }
+        .back-button { background: none; border: none; color: var(--header-text-color); font-size: 1.8em; cursor: pointer; margin-right: 15px; }
+        .theme-switcher { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .theme-switcher input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.4); transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #4caf50; }
+        input:checked + .slider:before { transform: translateX(22px); }
+        #category-screen, #caption-screen, #contact-screen, #tasbih-screen { display: block; } /* tasbih-screen যোগ করা হলো */
+        #caption-screen, #contact-screen, #tasbih-screen { display: none; } /* tasbih-screen যোগ করা হলো */
+        .main-title { text-align: center; margin: 20px 0; color: var(--primary-color); font-size: 1.8em; font-weight: 700; transition: color 0.3s ease; }
+        .category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .category-item { background-color: var(--card-bg-color); border-radius: 12px; padding: 20px 15px; text-align: center; cursor: pointer; box-shadow: 0 4px 12px var(--shadow-color); border: 1px solid var(--border-color); transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, border-color 0.3s ease; }
+        .category-item:hover { transform: translateY(-6px); box-shadow: 0 8px 20px var(--shadow-color); }
+        .category-item .icon { font-size: 2.5em; margin-bottom: 10px; }
+        .category-item h3 { font-size: 1.1em; font-weight: 600; margin-bottom: 5px; }
+        .category-item p { font-size: 0.8em; color: #757575; }
+        body[data-theme="dark"] .category-item p { color: #aaa; }
+        #caption-list { display: flex; flex-direction: column; gap: 15px; }
+        .caption-card { background-color: var(--card-bg-color); border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px var(--shadow-color); border: 1px solid var(--border-color); transition: background-color 0.3s ease, border-color 0.3s ease; }
+        .caption-card .caption-text { font-size: 1.1em; line-height: 1.7; margin-bottom: 20px; white-space: pre-wrap; }
+        .caption-card.image-card { padding: 10px; }
+        .caption-card .caption-image { max-width: 100%; border-radius: 8px; display: block; }
+        .actions { display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--border-color); padding-top: 15px; transition: border-color 0.3s ease; }
+        .action-button { background: none; border: none; color: #555; cursor: pointer; font-size: 0.9em; font-weight: 600; padding: 8px 12px; border-radius: 8px; display: flex; align-items: center; gap: 8px; transition: background-color 0.2s ease, color 0.2s ease; }
+        body[data-theme="dark"] .action-button { color: #bbb; }
+        .action-button:hover { background-color: var(--secondary-color); }
+        .action-button.copied { color: var(--primary-color); font-weight: 700; }
+        .contact-links { display: flex; flex-direction: column; gap: 20px; margin-top: 20px; }
+        .contact-link-card { display: flex; align-items: center; gap: 20px; background-color: var(--card-bg-color); padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px var(--shadow-color); text-decoration: none; color: var(--font-color); transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease; }
+        .contact-link-card:hover { transform: translateY(-6px); box-shadow: 0 8px 20px var(--shadow-color); }
+        .contact-link-card .contact-icon { width: 40px; height: 40px; }
+        .contact-link-card .contact-info h3 { margin: 0; font-size: 1.2em; }
+        
+        /* ================== নতুন তাসবিহ CSS এখানে শুরু ===================== */
+        .tasbih-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+        .tasbih-selection {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+        .tasbih-option {
+            background-color: var(--card-bg-color);
+            border: 2px solid var(--border-color);
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .tasbih-option.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        .tasbih-display {
+            background-color: var(--card-bg-color);
+            border-radius: 12px;
+            padding: 20px;
+            width: 100%;
+            max-width: 350px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px var(--shadow-color);
+        }
+        .tasbih-display .current-tasbih {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            min-height: 40px;
+        }
+        .tasbih-display .counter {
+            font-size: 4em;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .tasbih-main-button {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, var(--primary-color), #004d40);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0, 121, 107, 0.3);
+            transition: all 0.2s ease-out;
+            color: white;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .tasbih-main-button:active {
+            transform: scale(0.95);
+            box-shadow: 0 5px 10px rgba(0, 121, 107, 0.4);
+        }
+        .tasbih-reset-button {
+            margin-top: 25px;
+            background-color: #ef5350;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .tasbih-reset-button:hover {
+            background-color: #d32f2f;
+        }
+        /* ================== নতুন তাসবিহ CSS এখানে শেষ ===================== */
+    </style>
+</head>
+<body>
+
+    <div id="category-screen">
+        <div class="header">
+            <div class="header-content">
+                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzAwNzk2YiIvPjxwYXRoIGQ9Ik02OS4xMyw2OS4zN0E3NS4xMyw3NS4xMywwLDAsMSwzNy4yOSwyMy42MmMxLjE2LTIuNjgsNC40MS02LDcuNTUtNy42NCwzLjktMi4xLDguMzktMi44NywxMi4yMy0yLjEyLDYuNzIsMS4zLDExLjUyLDUsMTUwNyw5LjYxLDQuNDUsNC44Myw3LjQ2LDEwLjkyLDcuMzYLDE3LjY2LS4wOCw2LjYtMy41MSwxMi42Ny03LjgzLDE3LjQ0QzY4LjI3LDY0LjksNjYsNjcuMjcsNjkuMTMsNjkuMzdaIiBmaWxsPSIjZmZmIi8+PC9zdmc+" class="header-logo" alt="Logo">
+                <h1>Caption Buzz</h1>
+            </div>
+            <label class="theme-switcher">
+                <input type="checkbox" id="theme-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="container">
+            <h2 class="main-title">ক্যাপশনের দুনিয়া</h2>
+            <div class="category-grid"></div>
+        </div>
+    </div>
+
+    <div id="caption-screen">
+        <div class="header">
+            <div class="header-content">
+                <button class="back-button" onclick="showScreen('category-screen')">←</button>
+                <h1 id="caption-header-title">ক্যাপশন</h1>
+            </div>
+        </div>
+        <div class="container"><div id="caption-list"></div></div>
+    </div>
+
+    <!-- নতুন যোগ করা ক্যাটাগরি: ছোট কবিতা -->
+        <div class="category-data" data-key="short-poems" data-title="ছোট কবিতা" data-subtitle="অনুভূতির প্রতিচ্ছবি" data-icon="✍️" data-type="text">
+            <p>মেঘের কোলে রোদ হেসেছে,<br>বাদল গেছে টুটি।<br>আজ আমাদের ছুটি ও ভাই,<br>আজ আমাদের ছুটি।</p>
+        </div>
+    
+    <!-- ================== নতুন তাসবিহ স্ক্রিন এখানে শুরু ===================== -->
+    <div id="tasbih-screen">
+        <div class="header">
+            <div class="header-content">
+                <button class="back-button" onclick="showScreen('category-screen')">←</button>
+                <h1>ডিজিটাল তাসবিহ</h1>
+            </div>
+        </div>
+        <div class="tasbih-container">
+            <div class="tasbih-selection">
+                <button class="tasbih-option active" data-tasbih="সুবহানাল্লাহ">সুবহানাল্লাহ</button>
+                <button class="tasbih-option" data-tasbih="আলহামদুলিল্লাহ">আলহামদুলিল্লাহ</button>
+                <button class="tasbih-option" data-tasbih="আল্লাহু আকবার">আল্লাহু আকবার</button>
+                <button class="tasbih-option" data-tasbih="লা ইলাহা ইল্লাল্লাহ">লা ইলাহা ইল্লাল্লাহ</button>
+            </div>
+            <div class="tasbih-display">
+                <div class="current-tasbih" id="current-tasbih-display">সুবহানাল্লাহ</div>
+                <div class="counter" id="tasbih-counter-display">0</div>
+            </div>
+            <button class="tasbih-main-button" id="tasbih-count-button">গণনা করুন</button>
+            <button class="tasbih-reset-button" id="tasbih-reset-button">রিসেট</button>
+        </div>
+    </div>
+    <!-- ================== নতুন তাসবিহ স্ক্রিন এখানে শেষ ===================== -->
+
+        <!-- ক্যাটাগরি: ডেভেলপারের সাথে যোগাযোগ (এটি এডিট করার দরকার নেই) -->
+        <div class="category-data" data-key="developer-contact" data-title="ডেভেলপারের সাথে যোগাযোগ" data-subtitle="যেকোনো প্রয়োজনে" data-icon="🧑‍💻" data-is-contact="true">
+            <!-- এই ক্যাটাগরিতে কোনো ক্যাপশন যোগ করার দরকার নেই -->
+        </div>
+
+    </div>
+    <!-- ===================================================================== -->
+    <!-- =================== ক্যাপশন ডেটা এখানে শেষ ====================== -->
+    <!-- ===================================================================== -->
+
+    
+<script>
+    /**
+ * এই ফাইলটি Caption Buzz ওয়েবসাইটের সম্পূর্ণ ক্লায়েন্ট-সাইড লজিক পরিচালনা করে।
+ * এতে ডেটা পার্সিং, UI রেন্ডারিং এবং ইন্টারেক্টিভ তাসবিহ কাউন্টারের কার্যকারিতা অন্তর্ভুক্ত।
+ */
+
+// গ্লোবাল ভ্যারিয়েবল এবং DOM এলিমেন্টের রেফারেন্স
+const captionsData = {};
+const screens = {
+    'category-screen': document.getElementById('category-screen'),
+    'caption-screen': document.getElementById('caption-screen'),
+    'contact-screen': document.getElementById('contact-screen'),
+    'tasbih-screen': document.getElementById('tasbih-screen') // নতুন তাসবিহ স্ক্রিন যোগ করা হয়েছে
+};
+const categoryGrid = document.querySelector('.category-grid');
+const captionList = document.getElementById('caption-list');
+const captionHeaderTitle = document.getElementById('caption-header-title');
+const themeToggle = document.getElementById('theme-toggle');
+
+// তাসবিহ কাউন্টারের জন্য DOM এলিমেন্ট
+const tasbihCounterDisplay = document.getElementById('tasbih-counter-display');
+const currentTasbihDisplay = document.getElementById('current-tasbih-display');
+const tasbihCountButton = document.getElementById('tasbih-count-button');
+const tasbihResetButton = document.getElementById('tasbih-reset-button');
+const tasbihSelectionContainer = document.querySelector('.tasbih-selection');
+
+// তাসবিহ কাউন্টারের স্টেট (অবস্থা)
+let currentTasbihCount = 0;
+let selectedTasbih = "সুবহানাল্লাহ"; // ডিফল্ট তাসবিহ
+
+/**
+ * HTML এর data-source div থেকে ডেটা পার্স করে captionsData অবজেক্ট তৈরি করে।
+ */
+function parseHtmlData() {
+    const dataContainer = document.getElementById('data-source');
+    dataContainer.querySelectorAll('.category-data').forEach(catElement => {
+        const key = catElement.dataset.key;
+        if (!key) return;
+
+        const contentType = catElement.dataset.type || 'text';
+        const items = [];
+
+        if (contentType === 'text') {
+            catElement.querySelectorAll('p').forEach(p => items.push(p.innerHTML));
+        } else if (contentType === 'image') {
+            catElement.querySelectorAll('img').forEach(img => items.push(img.getAttribute('src')));
+        }
+        
+        captionsData[key] = {
+            title: catElement.dataset.title,
+            subtitle: catElement.dataset.subtitle,
+            icon: catElement.dataset.icon,
+            isContact: catElement.dataset.isContact === 'true',
+            type: contentType,
+            items: items
+        };
+    });
+}
+
+/**
+ * নির্দিষ্ট স্ক্রিন দেখানোর জন্য এই ফাংশনটি ব্যবহৃত হয়।
+ * @param {string} screenName - যে স্ক্রিনটি দেখানো হবে তার আইডি।
+ */
+function showScreen(screenName) {
+    Object.values(screens).forEach(screen => screen.style.display = 'none');
+    screens[screenName].style.display = 'block';
+    window.scrollTo(0, 0);
+}
+
+/**
+ * হোমপেজে সমস্ত ক্যাটাগরি কার্ড প্রদর্শন করে।
+ */
+function displayCategories() {
+    categoryGrid.innerHTML = '';
+    for (const key in captionsData) {
+        const category = captionsData[key];
+        const item = document.createElement('div');
+        item.className = 'category-item';
+        item.innerHTML = `<div class="icon">${category.icon}</div><h3>${category.title}</h3><p>${category.subtitle}</p>`;
+        
+        item.addEventListener('click', () => {
+            if (category.isContact) {
+                showScreen('contact-screen');
+            } else if (category.type === 'interactive') { // তাসবিহ ক্যাটাগরির জন্য কন্ডিশন
+                showScreen('tasbih-screen');
+            } else {
+                displayItems(key);
+                showScreen('caption-screen');
+            }
+        });
+        categoryGrid.appendChild(item);
+    }
+}
+
+/**
+ * নির্দিষ্ট ক্যাটাগরির আইটেমগুলো (টেক্সট বা ছবি) প্রদর্শন করে।
+ * @param {string} categoryKey - যে ক্যাটাগরির আইটেম দেখানো হবে তার কী।
+ */
+function displayItems(categoryKey) {
+    const category = captionsData[categoryKey];
+    captionHeaderTitle.textContent = category.title;
+    captionList.innerHTML = category.items.length ? '' : '<p>এই ক্যাটাগরিতে এখনো কোনো কন্টেন্ট যোগ করা হয়নি।</p>';
+    
+    category.items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'caption-card';
+
+        if (category.type === 'text') {
+            card.innerHTML = `<p class="caption-text">${item}</p>
+                <div class="actions">
+                    <button class="action-button copy-btn">📋 কপি</button>
+                    <button class="action-button share-btn">🔗 শেয়ার</button>
+                </div>`;
+        } else if (category.type === 'image') {
+            card.classList.add('image-card');
+            card.innerHTML = `<img src="${item}" class="caption-image" alt="${category.title} Image">`;
+        }
+        captionList.appendChild(card);
+    });
+}
+
+/**
+ * তাসবিহ কাউন্টার এর সমস্ত ইভেন্ট এবং লজিক পরিচালনা করে।
+ */
+function initializeTasbihCounter() {
+    // গণনা বাটনে ক্লিক
+    tasbihCountButton.addEventListener('click', () => {
+        currentTasbihCount++;
+        tasbihCounterDisplay.textContent = currentTasbihCount;
+    });
+
+    // রিসেট বাটনে ক্লিক
+    tasbihResetButton.addEventListener('click', () => {
+        currentTasbihCount = 0;
+        tasbihCounterDisplay.textContent = currentTasbihCount;
+    });
+
+    // তাসবিহ অপশন সিলেক্ট করা
+    tasbihSelectionContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('tasbih-option')) {
+            // সকল বাটন থেকে 'active' ক্লাস মুছে ফেলা
+            tasbihSelectionContainer.querySelectorAll('.tasbih-option').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // ক্লিক করা বাটনে 'active' ক্লাস যোগ করা
+            e.target.classList.add('active');
+            selectedTasbih = e.target.dataset.tasbih;
+            currentTasbihDisplay.textContent = selectedTasbih;
+            
+            // নতুন তাসবিহ সিলেক্ট করলে কাউন্টার রিসেট করা
+            currentTasbihCount = 0;
+            tasbihCounterDisplay.textContent = currentTasbihCount;
+        }
+    });
+}
+
+// কপি এবং শেয়ার বাটনের জন্য ইভেন্ট লিসেনার
+captionList.addEventListener('click', function(e) {
+    const button = e.target.closest('.action-button');
+    if (!button) return;
+
+    const card = button.closest('.caption-card');
+    const text = card.querySelector('.caption-text').innerText;
+
+    if (button.classList.contains('copy-btn')) {
+        navigator.clipboard.writeText(text).then(() => {
+            button.textContent = '✅ কপিড!';
+            button.classList.add('copied');
+            setTimeout(() => {
+                button.innerHTML = '📋 কপি';
+                button.classList.remove('copied');
+            }, 2000);
+        }).catch(() => {
+            alert('কপি করতে সমস্যা হয়েছে। ওয়েবসাইটটি সার্ভারে হোস্ট করলে এটি কাজ করবে।');
+        });
+    }
+
+    if (button.classList.contains('share-btn')) {
+        if (navigator.share) {
+            navigator.share({ title: 'Caption Buzz থেকে', text }).catch(console.error);
+        } else {
+            alert('আপনার ব্রাউজার শেয়ার অপশন সাপোর্ট করে না।');
+        }
+    }
+});
+
+// থিম পরিবর্তন করার জন্য ইভেন্ট লিসেনার
+themeToggle.addEventListener('change', () => {
+    document.body.setAttribute('data-theme', themeToggle.checked ? 'dark' : '');
+});
+
+// রাইট-ক্লিক ব্লক করা
+document.addEventListener('contextmenu', event => event.preventDefault());
+
+// পেজ লোড হওয়ার পর মূল ফাংশনগুলো কল করা
+document.addEventListener('DOMContentLoaded', () => {
+    parseHtmlData();
+    displayCategories();
+    initializeTasbihCounter(); // তাসবিহ কাউন্টার চালু করা
+}); 
+</script>
+
+</html>
