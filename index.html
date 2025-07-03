@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Caption Buzz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #00796b; --secondary-color: #f4f6f8; --font-color: #333;
+            --card-bg-color: #ffffff; --shadow-color: rgba(0, 0, 0, 0.08); --border-color: #e0e0e0;
+            --header-text-color: #ffffff;
+        }
+        body[data-theme="dark"] {
+            --primary-color: #00897b; --secondary-color: #121212; --font-color: #e0e0e0;
+            --card-bg-color: #1e1e1e; --shadow-color: rgba(0, 0, 0, 0.2); --border-color: #333;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Hind Siliguri', sans-serif; background-color: var(--secondary-color);
+            color: var(--font-color); transition: background-color 0.3s ease, color 0.3s ease;
+            -webkit-user-select: none; -ms-user-select: none; user-select: none;
+        }
+        .container { padding: 15px; max-width: 100%; overflow-x: hidden; }
+        .header {
+            background-color: var(--primary-color); color: var(--header-text-color); padding: 15px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 1000; transition: background-color 0.3s ease;
+        }
+        .header-content { display: flex; align-items: center; }
+        .header-logo { width: 32px; height: 32px; border-radius: 50%; margin-right: 12px; background-color: #fff; padding: 2px; }
+        .header h1 { font-size: 1.3em; margin: 0; }
+        .back-button { background: none; border: none; color: var(--header-text-color); font-size: 1.8em; cursor: pointer; margin-right: 15px; }
+        .theme-switcher { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .theme-switcher input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #4caf50; }
+        input:checked + .slider:before { transform: translateX(22px); }
+        #category-screen, #caption-screen, #contact-screen { display: block; }
+        #caption-screen, #contact-screen { display: none; }
+        .main-title { text-align: center; margin: 20px 0; color: var(--primary-color); font-size: 1.8em; font-weight: 700; transition: color 0.3s ease; }
+        .category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .category-item { background-color: var(--card-bg-color); border-radius: 12px; padding: 20px 15px; text-align: center; cursor: pointer; box-shadow: 0 4px 12px var(--shadow-color); border: 1px solid var(--border-color); transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, border-color 0.3s ease; }
+        .category-item:hover { transform: translateY(-6px); box-shadow: 0 8px 20px var(--shadow-color); }
+        .category-item .icon { font-size: 2.5em; margin-bottom: 10px; }
+        .category-item h3 { font-size: 1.1em; font-weight: 600; margin-bottom: 5px; }
+        .category-item p { font-size: 0.8em; color: #757575; }
+        body[data-theme="dark"] .category-item p { color: #aaa; }
+        #caption-list { display: flex; flex-direction: column; gap: 15px; }
+        .caption-card { background-color: var(--card-bg-color); border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px var(--shadow-color); border: 1px solid var(--border-color); transition: background-color 0.3s ease, border-color 0.3s ease; }
+        .caption-card .caption-text { font-size: 1.1em; line-height: 1.7; margin-bottom: 20px; }
+        .actions { display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--border-color); padding-top: 15px; transition: border-color 0.3s ease; }
+        .action-button { background: none; border: none; color: #555; cursor: pointer; font-size: 0.9em; font-weight: 600; padding: 8px 12px; border-radius: 8px; display: flex; align-items: center; gap: 8px; transition: background-color 0.2s ease, color 0.2s ease; }
+        body[data-theme="dark"] .action-button { color: #bbb; }
+        .action-button:hover { background-color: var(--secondary-color); }
+        .action-button.copied { color: var(--primary-color); font-weight: 700; }
+        .contact-links { display: flex; flex-direction: column; gap: 20px; margin-top: 20px; }
+        .contact-link-card { display: flex; align-items: center; gap: 20px; background-color: var(--card-bg-color); padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px var(--shadow-color); text-decoration: none; color: var(--font-color); transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease; }
+        .contact-link-card:hover { transform: translateY(-6px); box-shadow: 0 8px 20px var(--shadow-color); }
+        .contact-link-card .contact-icon { width: 40px; height: 40px; }
+        .contact-link-card .contact-info h3 { margin: 0; font-size: 1.2em; }
+    </style>
+</head>
+<body>
+
+    <div id="category-screen">
+        <div class="header">
+            <div class="header-content">
+                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzAwNzk2YiIvPjxwYXRoIGQ9Ik02OS4xMyw2OS4zN0E3NS4xMyw3NS4xMywwLDAsMSwzNy4yOSwyMy42MmMxLjE2LTIuNjgsNC40MS02LDcuNTUtNy42NCwzLjktMi4xLDguMzktMi44NywxMi4yMy0yLjEyLDYuNzIsMS4zLDExLjUyLDUsMTUwNyw5LjYxLDQuNDUsNC44Myw3LjQ2LDEwLjkyLDcuMzYLDE3LjY2LS4wOCw2LjYtMy41MSwxMi42Ny03LjgzLDE3LjQ0QzY4LjI3LDY0LjksNjYsNjcuMjcsNjkuMTMsNjkuMzdaIiBmaWxsPSIjZmZmIi8+PC9zdmc+" class="header-logo" alt="Logo">
+                <h1>Caption Buzz</h1>
+            </div>
+            <label class="theme-switcher">
+                <input type="checkbox" id="theme-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="container">
+            <h2 class="main-title">ক্যাপশনের দুনিয়া</h2>
+            <div class="category-grid"></div>
+        </div>
+    </div>
+
+    <div id="caption-screen">
+        <div class="header">
+            <div class="header-content">
+                <button class="back-button" onclick="showScreen('category-screen')">&#8592;</button>
+                <h1 id="caption-header-title">ক্যাপশন</h1>
+            </div>
+        </div>
+        <div class="container"><div id="caption-list"></div></div>
+    </div>
+    
+    <div id="contact-screen">
+         <div class="header">
+            <div class="header-content">
+                <button class="back-button" onclick="showScreen('category-screen')">&#8592;</button>
+                <h1>যোগাযোগ করুন</h1>
+            </div>
+        </div>
+        <div class="container">
+            <div class="contact-links">
+                <a href="https://wa.me/8801XXXXXXXXX" target="_blank" class="contact-link-card"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCI+PHBhdGggZmlsbD0iIzRjYWY1MCIgZD0iTTQyLjYgNS40Yy00LjgtNC44LTcuNiAxMS4yLTcuNiAxOC4xIDAgNi44IDIuOCAxMy4yIDcuNiAxOC4xQzMyIDQ5LjIgMjUuNCA1MiAyNC4zIDUyIDIxLjggNTIgNy43IDQ4LjMgNC45IDM4LjcgMy4yIDMyLjYgNC4zIDI0IDExLjIgMTMuNyAxOC4xIDYgMjguMyAzIDI5LjQgM3oiLz48cGF0aCBmaWxsPSIjZmFmYWZhIiBkPSJNMzAuNiAxMi45Yy0yLjQgMi40LTMuOCA1LjctMy44IDkuMiAwIDMuNSAxLjQgNi44IDMuOCA5LjIgMS4yIDEuMiAyLjUgMi4yIDQuMSAyLjkgMS45IDAgMy42LS42IDUuMy0xLjggMS42LTEuMyAyLjctMy4xIDMuMS01LjMuMy0yLjEtLjItMy45LTEuMy01LjYtMS4xLTEuNy0yLjktMy01LTMuNmwtMy40LS45Yy0uMiAwLS41LjEtLjcuMmwtMS4xIDEuNWMtLjIgLjQtLjIuNyAwIDEuMWwxLjggMi41Yy4xLjIuMi41IDAgLjdsLS45IDEuMmMtLjEgLjItLjQuMy0uNi4yLTEuNC0uNy0yLjYtMS42LTMuNi0yLjgtMS0xLjEtMS44LTIuNC0yLjQtMy45LS4xLS4yIDAtLjQuMi0uNmwxLjEtLjljLjItLjIuMy0uNS4yLS43bC0uOS0zLjRjLS4xLS41LS41LTEtMS0xLjN6Ii8+PC9zdmc+" alt="WhatsApp" class="contact-icon"><div class="contact-info"><h3>WhatsApp</h3></div></a>
+                <a href="https://facebook.com/YOUR_PROFILE_ID" target="_blank" class="contact-link-card"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCI+PHBhdGggZmlsbD0iIzE4NzdlMiIgZD0iTTQyLDM3YzAsMi43NjIsMi4yMzgsNSw1LDVIMzBjLTIuNzYyLDAtNS0yLjIzOC01LTVWMTEuMUMyNSw4LjQxMywyNy4yMzgsNiwzMCw2aDEyYzIuNzYyLDAsNSwyLjIzOCw1LDVWMzd6Ii8+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTM2LDMybDEtNmg0di0zYzAtMy44NTksMS45MjgtNyw3LTdoM3Y1VjI3aC00di0zYzAtMS4xMDMsMC4wMDctMywxLjQ4NC0zaDEuNTE2djVoM1YxN2gtNVYxNgoJYy0zLDAtNCwzLTQsNGwwLDB2M2gtNFYyNmg0TDM2LDMyeiIvPjwvc3ZnPg==" alt="Facebook" class="contact-icon"><div class="contact-info"><h3>Facebook</h3></div></a>
+                <a href="https://t.me/YOUR_USERNAME" target="_blank" class="contact-link-card"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCI+PGNpcmNsZSBmaWxsPSIjMjhhOGQxIiBjeD0iMjQiIGN5PSIyNCIgcj0iMjIiLz48cGF0aCBmaWxsPSIjZmZmIiBkPSJNMzMuOSwzMi4xbC0zLjUtMTUuOWMtMC4yLTAuOS0wLjctMS4xLTEuNS0wLjlsLTIwLjIsNy4xYy0wLjgsMC4zLTEsMS40LTAuMywybDUuMiwzLjljMC4zLDAuMiwwLjQsMC43LDAuMiwwLjlsLTEuNSw0LjRjLTAuMiwwLjYtMC4xLDEuMiwwLjUsMS41YzAuNywwLjQsMS40LDAuMywxLjgtMC4yTDMzLDMzLjRDMy42LDMzLDMzLjcsMzIuNywzMy45LDMyLjF6Ii8+PHBhdGggZmlsbD0iI2MyZTJmMCIgZD0iTTIyLjcsMjkuMUwyNiwzN2wxLjgtNC41bC01LjEtNC40SDIyLjd6Ii8+PHBhdGggZmlsbD0iI2FkZDFlNCIgZD0iTTIyLjcsMjkuMWw0LjUtMS44TDM2LjUsMTZsLTguOSwxMS44TCyMi43LDI5LjF6Ii8+PC9zdmc+" alt="Telegram" class="contact-icon"><div class="contact-info"><h3>Telegram</h3></div></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- ================== ক্যাপশন ডেটা এখানে শুরু ===================== -->
+    <!-- আপনাকে শুধু এই সেকশনেই কাজ করতে হবে। অন্য কোথাও কিছু করার দরকার নেই। -->
+    <!-- ===================================================================== -->
+    <div id="data-source" style="display: none;">
+
+        <!-- ক্যাটাগরি: ফানি স্ট্যাটাস -->
+        <div class="category-data" data-key="funny-status" data-title="ফানি স্ট্যাটাস" data-subtitle="বাংলার সেরা ফানি পোস্ট" data-icon="😂">
+            <p>দাদু:- তোর স্কুলের স্যার আমাকে রাস্তায় দেখে অজ্ঞান হয়ে গেল কেন? আমি:- তুমি মারা গেছো বলে আমি এক সপ্তাহের ছুটি নিয়েছিলাম। 🐸</p>
+            <p>চায়ের দোকানের কাপগুলো এতটাই ছোট করে দিয়েছে যে মনে হয় চা খাচ্ছি না পোলিও ড্রপ খাচ্ছি! ☕</p>
+            <p>পরীক্ষার হলে প্রথম ৩০ মিনিট আমি প্রশ্নপত্রের সাথে পরিচিত হই, পরের ৩০ মিনিট উত্তরপত্রের সাথে, বাকি সময়টা গার্ডের সাথে। 😜</p>
+        </div>
+
+        <!-- ক্যাটাগরি: রোমান্টিক ক্যাপশন -->
+        <div class="category-data" data-key="love-status" data-title="রোমান্টিক ক্যাপশন" data-subtitle="ভালোবাসার মিষ্টি কথা" data-icon="😍">
+            <p>তুমি সেই কবিতা, যা আমি প্রতিদিন পড়ি কিন্তু কখনো শেষ হয় না। ❤️</p>
+            <p>তোমার চোখে আমার সর্বনাশ দেখেও আমি বারবার তোমার দিকেই তাকাই।</p>
+            <p>পৃথিবীর সবটুকু সুখ হয়তো তোমার আঁচলেই বাঁধা আছে। 🥰</p>
+        </div>
+
+        <!-- ক্যাটাগরি: কষ্টের স্ট্যাটাস -->
+        <div class="category-data" data-key="sad-status" data-title="কষ্টের স্ট্যাটাস" data-subtitle="কিছু না বলা কথা" data-icon="😔">
+            <p>কিছু গল্প অসমাপ্তই সুন্দর, কারণ সমাপ্তিটা হয়তো আরও বেশি কষ্টের হতো।</p>
+            <p>যেখানে গুরুত্ব নেই, সেখানে চুপচাপ সরে আসাই বুদ্ধিমানের কাজ।</p>
+            <p>আজকাল একাকীত্বটাও ভালো লাগে, কারণ এখানে কেউ কষ্ট দেওয়ার নেই।</p>
+        </div>
+
+        <!-- ক্যাটাগরি: অ্যাটিটিউড ক্যাপশন -->
+        <div class="category-data" data-key="attitude-status" data-title="অ্যাটিটিউড ক্যাপশন" data-subtitle="নিজের মতো করে বাঁচো" data-icon="😈">
+            <p>আমি যেমন, তেমনই থাকবো। কারো ভালো লাগার জন্য নিজেকে বদলানোর সময় নেই।</p>
+            <p>আমার নীরবতাকে দুর্বলতা ভেবো না, ঝড়ের আগে পরিবেশ শান্তই থাকে।</p>
+            <p>সবাইকে খুশি করার দায়িত্ব আমি নিইনি।</p>
+        </div>
+
+        <!-- ক্যাটাগরি: ইসলামিক স্ট্যাটাস -->
+        <div class="category-data" data-key="islamic-status" data-title="ইসলামিক স্ট্যাটাস" data-subtitle="ঈমান ও আমল" data-icon="🕌">
+            <p>হে আল্লাহ, এমন জীবন দিও না যেখানে তুমি ছাড়া আর সবই আছে।</p>
+            <p>সবচেয়ে বড় বিজয় হলো নিজের নফসের বিরুদ্ধে জয় লাভ করা।</p>
+            <p>আলহামদুলিল্লাহ্‌, প্রতিটি নিঃশ্বাসের জন্য।</p>
+        </div>
+
+        <!-- ক্যাটাগরি: মনীষীদের উক্তি -->
+        <div class="category-data" data-key="wise-quotes" data-title="মনীষীদের উক্তি" data-subtitle="বিখ্যাত ব্যক্তিদের কথা" data-icon="📜">
+            <p>অসৎ আনন্দের চেয়ে পবিত্র বেদনা অনেক ভালো। - হোমার</p>
+            <p>ব্যর্থতার ছাই থেকে সফলতার প্রাসাদ তৈরি হয়। - ডেল কার্নেগী</p>
+            <p>যে নিজেকে অক্ষম ভাবে, তাকে কেউ সাহায্য করতে পারে না। - জন এন্ডারসন</p>
+        </div>
+
+        <!-- ক্যাটাগরি: ডেভেলপারের সাথে যোগাযোগ (এটি এডিট করার দরকার নেই) -->
+        <div class="category-data" data-key="developer-contact" data-title="ডেভেলপারের সাথে যোগাযোগ" data-subtitle="যেকোনো প্রয়োজনে" data-icon="🧑‍💻" data-is-contact="true">
+            <!-- এই ক্যাটাগরিতে কোনো ক্যাপশন যোগ করার দরকার নেই -->
+        </div>
+
+    </div>
+    <!-- ===================================================================== -->
+    <!-- =================== ক্যাপশন ডেটা এখানে শেষ ====================== -->
+    <!-- ===================================================================== -->
+
+    <script>
+        const captionsData = {}; // এই অবজেক্টটি এখন খালি থাকবে, ডেটা HTML থেকে আসবে
+        const screens = { 'category-screen': document.getElementById('category-screen'), 'caption-screen': document.getElementById('caption-screen'), 'contact-screen': document.getElementById('contact-screen') };
+        const categoryGrid = document.querySelector('.category-grid');
+        const captionList = document.getElementById('caption-list');
+        const captionHeaderTitle = document.getElementById('caption-header-title');
+        const themeToggle = document.getElementById('theme-toggle');
+        
+        function parseHtmlData() {
+            const dataContainer = document.getElementById('data-source');
+            const categories = dataContainer.querySelectorAll('.category-data');
+            
+            categories.forEach(catElement => {
+                const key = catElement.dataset.key;
+                if (!key) return;
+
+                captionsData[key] = {
+                    title: catElement.dataset.title,
+                    subtitle: catElement.dataset.subtitle,
+                    icon: catElement.dataset.icon,
+                    isContact: catElement.dataset.isContact === 'true',
+                    captions: []
+                };
+
+                if (!captionsData[key].isContact) {
+                    const captionParagraphs = catElement.querySelectorAll('p');
+                    captionParagraphs.forEach(p => {
+                        captionsData[key].captions.push(p.innerHTML);
+                    });
+                }
+            });
+        }
+
+        function showScreen(screenName) { Object.values(screens).forEach(screen => screen.style.display = 'none'); screens[screenName].style.display = 'block'; window.scrollTo(0, 0); }
+        function displayCategories() { categoryGrid.innerHTML = ''; for (const key in captionsData) { const category = captionsData[key]; const item = document.createElement('div'); item.className = 'category-item'; item.innerHTML = `<div class="icon">${category.icon}</div><h3>${category.title}</h3><p>${category.subtitle}</p>`; item.addEventListener('click', () => { if (category.isContact) showScreen('contact-screen'); else { displayCaptions(key); showScreen('caption-screen'); } }); categoryGrid.appendChild(item); } }
+        function displayCaptions(categoryKey) { const category = captionsData[categoryKey]; captionHeaderTitle.textContent = category.title; captionList.innerHTML = category.captions.length ? '' : '<p>এই ক্যাটাগরিতে এখনো কোনো ক্যাপশন যোগ করা হয়নি।</p>'; category.captions.forEach(caption => { const card = document.createElement('div'); card.className = 'caption-card'; card.innerHTML = `<p class="caption-text">${caption}</p><div class="actions"><button class="action-button copy-btn">📋 কপি</button><button class="action-button share-btn">🔗 শেয়ার</button></div>`; captionList.appendChild(card); }); }
+        captionList.addEventListener('click', function(e) { const button = e.target.closest('.action-button'); if (!button) return; const card = button.closest('.caption-card'); const text = card.querySelector('.caption-text').innerText; if (button.classList.contains('copy-btn')) { navigator.clipboard.writeText(text).then(() => { button.textContent = '✅ কপিড!'; button.classList.add('copied'); setTimeout(() => { button.innerHTML = '📋 কপি'; button.classList.remove('copied'); }, 2000); }).catch(() => alert('কপি করতে সমস্যা হয়েছে। ওয়েবসাইটটি সার্ভারে হোস্ট করলে এটি কাজ করবে।')); } if (button.classList.contains('share-btn')) { if (navigator.share) { navigator.share({ title: 'Caption Buzz থেকে', text }).catch(console.error); } else { alert('আপনার ব্রাউজার শেয়ার অপশন সাপোর্ট করে না।'); } } });
+        themeToggle.addEventListener('change', () => { if (themeToggle.checked) { document.body.setAttribute('data-theme', 'dark'); } else { document.body.removeAttribute('data-theme'); } });
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('DOMContentLoaded', () => {
+            parseHtmlData();
+            displayCategories();
+        });
+    </script>
+</body>
+</html>
